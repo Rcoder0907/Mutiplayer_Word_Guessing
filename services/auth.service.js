@@ -14,7 +14,7 @@ const login = async ({ loginPayload }) => {
     email: loginPayload.email
   }).lean()
   if (!user) {
-    throw new Error('User not found')
+    throw new Error('Account not found')
   }
   const match = await decrypt({ hashed: user.password, plain: loginPayload.password })
   if (!match) {

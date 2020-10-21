@@ -51,10 +51,18 @@
         <div class="col-md-4">
           <h6 class="text-muted">ONLINE</h6>
           <ul class="list-group">
-            <li class="list-group-item" v-for="user in dashboard.onlineUsers" @click="showDialog(user.id)">
-              {{ user.name }}
-              <span v-if="socket.id == user.id" class="badge badge-primary badge-pill">You</span>
-            </li>
+
+            <template  v-for="user in dashboard.onlineUsers">
+              <li v-if="socket.id == user.id" class="list-group-item">
+                {{ user.name }}
+                <span class="badge badge-primary badge-pill">You</span>
+              </li>
+
+              <li v-else class="list-group-item" @click="showDialog(user.id)">
+                {{ user.name }}
+              </li>
+            </template>
+
           </ul>
         </div>
         <div class="col-md-8">
@@ -80,7 +88,8 @@
                   <h5 class="text-muted">Waiting for an answer.</h5>
                 </div>
                 <div v-else>
-                  <button v-if="dashboard.quiz.questionsAsked < 20" @click="askAQuestion" class="btn btn-primary">Ask A Question</button>
+                  <button v-if="dashboard.quiz.questionsAsked < 20" @click="askAQuestion" class="btn btn-primary">Ask A
+                    Question</button>
                   <button @click="submitAnswer" class="btn btn-info">Submit Answer</button>
                 </div>
               </div>
@@ -127,7 +136,7 @@
               <label for="registerPasword">Password</label>
               <input type="password" v-model="register.password" class="form-control" id="registerPassword">
             </div>
-            <button type="submit" @click.prevent="doRegister" class="btn btn-primary">Regisger</button>
+            <button type="submit" @click.prevent="doRegister" class="btn btn-primary">Register</button>
           </div>
         </div>
       </div>

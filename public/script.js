@@ -165,13 +165,16 @@ var app = new Vue({
                     password: this.login.password
                 })
                 .then(res => {
-                    if (res.status === 200) {
-                        localStorage.setItem('authToken', res.data);
-                        location.reload();
-                    } else {
-                        alert('Login failed');
-                    }
+                    localStorage.setItem('authToken', res.data);
+                    location.reload();
                 })
+                .catch(e => {
+                    return Swal.fire(
+                        'Login Failed!',
+                        e.response.data || 'Unable to login',
+                        'error'
+                    );
+                });
         },
 
         doRegister () {
@@ -188,6 +191,13 @@ var app = new Vue({
                         this.page = 'Login'
                     }
                 })
+                .catch(e => {
+                    return Swal.fire(
+                        'Registration Failed!',
+                        e.response.data || 'Unable to register',
+                        'error'
+                    );
+                });
         },
 
         logout () {
@@ -203,12 +213,12 @@ var app = new Vue({
                 inputLabel: 'Answer',
                 showCancelButton: true,
                 inputValidator: (value) => {
-                  if (!value) {
-                    return 'You need to write something!'
-                  }
+                    if (!value) {
+                        return 'You need to write something!'
+                    }
                 }
-              }).then(response => {
-                  this.socket.emit('new', {
+            }).then(response => {
+                this.socket.emit('new', {
                     player,
                     answer: response.value
                 });
@@ -245,12 +255,12 @@ var app = new Vue({
                 inputLabel: 'Answer',
                 showCancelButton: true,
                 inputValidator: (value) => {
-                  if (!value) {
-                    return 'You need to write something!'
-                  }
+                    if (!value) {
+                        return 'You need to write something!'
+                    }
                 }
-              }).then(response => {
-                  this.socket.emit('submit answer', {
+            }).then(response => {
+                this.socket.emit('submit answer', {
                     quizId: this.dashboard.quiz.quizId,
                     answer: response.value
                 });
