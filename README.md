@@ -1,6 +1,7 @@
 # Multiplayer Chatting Game
 
 Steps to run the quiz
+- Copy `.env.example` to `.env` and update values according to dockerfile if required
 - Run `docker-compose up` to start it, application will be served at localhost:3000
 - Visit localhost:3000 and click on register and enter details
 - Enter login details here
