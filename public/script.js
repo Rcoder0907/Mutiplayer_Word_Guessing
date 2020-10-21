@@ -80,10 +80,6 @@ var app = new Vue({
             });
         });
 
-        socket.on('chat message', function (msg) {
-            console.log('Message:', msg);
-        });
-
         socket.on('unauthorized', (id) => {
             if (id === 0) {
                 if (this.loggedIn) {
@@ -137,11 +133,7 @@ var app = new Vue({
             this.dashboard.qustion = '';
             this.dashboard.awaitingQuestion = true;
             this.dashboard.awaitingAnswer = false;
-            // Dialog.fire({
-            //     icon: 'Success',
-            //     title: value
-            // });
-        })
+        });
 
         socket.on('incorrect guess', (payload) => {
             const { quizId, value } = payload;
@@ -154,7 +146,7 @@ var app = new Vue({
             this.dashboard.qustion = '';
             this.dashboard.awaitingQuestion = true;
             this.dashboard.awaitingAnswer = false;
-        })
+        });
     },
 
     methods: {
@@ -218,6 +210,7 @@ var app = new Vue({
                     }
                 }
             }).then(response => {
+                if (!response.value) return;
                 this.socket.emit('new', {
                     player,
                     answer: response.value
@@ -239,6 +232,7 @@ var app = new Vue({
                 }
             })
                 .then(response => {
+                    if (!response.value) return;
                     this.socket.emit('ask question', {
                         question: response.value,
                         quizId: this.dashboard.quiz.quizId
@@ -260,6 +254,7 @@ var app = new Vue({
                     }
                 }
             }).then(response => {
+                if (!response.value) return;
                 this.socket.emit('submit answer', {
                     quizId: this.dashboard.quiz.quizId,
                     answer: response.value
