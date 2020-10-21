@@ -48,17 +48,49 @@
 
     <div class="container mt-4">
       <div v-if="page === 'Dashboard'" class="row">
-        <div class="col-4">
-          <h4 class="text-muted">ONLINE</h4>
+        <div class="col-md-4">
+          <h6 class="text-muted">ONLINE</h6>
           <ul class="list-group">
-            <li class="list-group-item" v-for="user in dashboard.onlineUsers">
+            <li class="list-group-item" v-for="user in dashboard.onlineUsers" @click="showDialog(user.id)">
               {{ user.name }}
               <span v-if="socket.id == user.id" class="badge badge-primary badge-pill">You</span>
             </li>
           </ul>
         </div>
-        <div class="col-8">
-          Hello
+        <div class="col-md-8">
+          <div v-if="quizRole" class="card text-center">
+            <div class="card-header">
+              Live Quiz - {{ quizRole }}
+            </div>
+            <div class="card-body">
+
+
+              <div v-if="quizRole === 'Owner'">
+                <h4 class="text-muted" v-if="dashboard.question">{{ dashboard.question }}</h4>
+                <div v-if="!dashboard.awaitingQuestion">
+                  <button @click="respondToQuiz('Yes')" class="btn btn-primary">Yes</button>
+                  <button @click="respondToQuiz('No')" class="btn btn-danger">No</button>
+                </div>
+                <h4 v-else class="text-muted">Waiting for question</h4>
+              </div>
+
+
+              <div v-else>
+                <div v-if="dashboard.awaitingAnswer">
+                  <h5 class="text-muted">Waiting for an answer.</h5>
+                </div>
+                <div v-else>
+                  <button v-if="dashboard.quiz.questionsAsked < 20" @click="askAQuestion" class="btn btn-primary">Ask A Question</button>
+                  <button @click="submitAnswer" class="btn btn-info">Submit Answer</button>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer text-muted">
+              Questions Asked: {{ dashboard.quiz.questionsAsked }}
+            </div>
+          </div>
+          <div v-else class="d-flex justify-content-center align-items-center">No live quiz, click on any user to start
+          </div>
         </div>
       </div>
 

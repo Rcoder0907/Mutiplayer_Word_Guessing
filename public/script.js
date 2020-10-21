@@ -37,8 +37,11 @@ var app = new Vue({
         loggedIn: false,
 
         dashboard: {
-            onlineUsers: [],
-            requests: []
+            onlineUsers: [], // List of all online users
+            quiz: {}, // Current live guess
+            question: '', // Question to be asked by player
+            awaitingAnswer: false, // Player waiting for answer on a question they asked
+            awaitingQuestion: true // Owner waiting for question on a guess they started.
         },
 
         login: {
@@ -92,11 +95,69 @@ var app = new Vue({
 
         socket.on('users updated', (users) => {
             this.dashboard.onlineUsers = users;
+        });
+
+        socket.on('new guess', (guess) => {
+            this.dashboard.quiz = guess;
+        });
+
+        socket.on('question asked', (payload) => {
+            const { question, quizId } = payload;
+            if (quizId !== this.dashboard.quiz.quizId) {
+                return false;
+            }
+            this.dashboard.question = question;
+            this.dashboard.quiz.questionsAsked++;
+            this.dashboard.awaitingQuestion = false;
+        });
+
+        socket.on('quiz replied', (payload) => {
+            const { quizId, value } = payload;
+            Dialog.fire({
+                icon: 'Success',
+                title: value
+            });
+
+            if (quizId !== this.dashboard.quiz.quizId) {
+                return false;
+            }
+            this.dashboard.awaitingAnswer = false;
+            this.dashboard.question = '';
+            this.dashboard.awaitingQuestion = true;
+        })
+
+        socket.on('correct guess', (payload) => {
+            const { quizId, value } = payload;
+            Swal.fire(
+                'Correct!',
+                this.quizRole === 'Player' ? 'You guessed it correct.' : 'Guess was correct',
+                'success'
+            );
+            this.dashboard.quiz = {};
+            this.dashboard.qustion = '';
+            this.dashboard.awaitingQuestion = true;
+            this.dashboard.awaitingAnswer = false;
+            // Dialog.fire({
+            //     icon: 'Success',
+            //     title: value
+            // });
+        })
+
+        socket.on('incorrect guess', (payload) => {
+            const { quizId, value } = payload;
+            Swal.fire(
+                'Oops!',
+                'Better luck next time.',
+                'error'
+            );
+            this.dashboard.quiz = {};
+            this.dashboard.qustion = '';
+            this.dashboard.awaitingQuestion = true;
+            this.dashboard.awaitingAnswer = false;
         })
     },
 
     methods: {
-
         doLogin () {
             axios
                 .post('/login', {
@@ -132,6 +193,87 @@ var app = new Vue({
         logout () {
             localStorage.removeItem('authToken');
             location.reload();
+        },
+
+        // Prompt to start a new guess
+        showDialog: (player) => {
+            Swal.fire({
+                title: 'Enter word to be guessed',
+                input: 'text',
+                inputLabel: 'Answer',
+                showCancelButton: true,
+                inputValidator: (value) => {
+                  if (!value) {
+                    return 'You need to write something!'
+                  }
+                }
+              }).then(response => {
+                  this.socket.emit('new', {
+                    player,
+                    answer: response.value
+                });
+            })
+        },
+
+        // Prompt to show question dialog to help in guess
+        askAQuestion () {
+            Swal.fire({
+                title: 'Enter your question',
+                input: 'text',
+                inputLabel: 'Question',
+                showCancelButton: true,
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'You need to write something!'
+                    }
+                }
+            })
+                .then(response => {
+                    this.socket.emit('ask question', {
+                        question: response.value,
+                        quizId: this.dashboard.quiz.quizId
+                    });
+                    this.dashboard.quiz.questionsAsked++;
+                    this.dashboard.awaitingAnswer = true;
+                })
+        },
+
+        submitAnswer () {
+            Swal.fire({
+                title: 'Enter word to be guessed',
+                input: 'text',
+                inputLabel: 'Answer',
+                showCancelButton: true,
+                inputValidator: (value) => {
+                  if (!value) {
+                    return 'You need to write something!'
+                  }
+                }
+              }).then(response => {
+                  this.socket.emit('submit answer', {
+                    quizId: this.dashboard.quiz.quizId,
+                    answer: response.value
+                });
+            })
+        },
+
+        // Reply to a question asked by player
+        respondToQuiz (response) {
+            this.socket.emit('quiz reply', { quizId: this.dashboard.quiz.quizId, value: response });
+            this.dashboard.awaitingQuestion = true;
+            this.dashboard.question = '';
+        }
+    },
+
+    computed: {
+        quizRole: function () {
+            if (Object.keys(this.dashboard.quiz).length) {
+                if (`${this.dashboard.quiz.owner.id}` === `${this.socket.id}`) {
+                    return 'Owner';
+                }
+                return 'Player';
+            }
+            return false
         }
     }
 });
