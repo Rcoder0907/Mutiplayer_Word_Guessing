@@ -9,8 +9,7 @@ const checkAuth = (req, res, next) => {
     return next()
   } catch (e) {
     return res.send(401).json({
-      message: 'Unable to login',
-      debug: e
+      message: 'Unable to login'
     })
   }
 }

@@ -34,7 +34,7 @@ router.post('/login', async (req, res, next) => {
   }
 })
 
-router.get('/me', checkAuth, (req, res, next) => {
+router.get('/me', checkAuth, (req, res) => {
   return res.json(req.user)
 })
 
