@@ -8,7 +8,12 @@ services:
         image: api
         container_name: gg_api
         restart: unless-stopped
-        env_file: api/.env
+        # env_file: api/.env
+        environment:
+            MONGO_CONNECTION_URI: "mongodb://db:27017/mp_guess"
+            JWT_SECRET: 09ccf4f584621094
+            SALT_LENTH: 10
+            PORT: 3000
         ports:
             - "3000:3000"
         networks:
@@ -20,8 +25,10 @@ services:
             dockerfile: Dockerfile
         image: ui
         container_name: gg_ui
-        restart: unless-stopped
-        env_file: ui/.env
+        # Vue build doesn't seem to be respecing environment varialbed from shell,1
+        # env_file: ui/.env
+        # environment:
+        #     VUE_APP_API_URL: "http://localhost:3000"
         ports:
             - "8080:8080"
         command: http-server dist

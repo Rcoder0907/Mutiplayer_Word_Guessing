@@ -1,5 +1,7 @@
 # Multiplayer Chatting Game
 
+NOTE: Vue build doesn't seem to respect env set in enviroment, so .env must be used for build
+
 Steps to run the quiz
 - Run `docker-compose up` to start it, application will be served at localhost:8080
 - Visit localhost:8080 and click on register and enter details
@@ -10,5 +12,3 @@ Steps to run the quiz
 - A prompt will show on player 1 screen when a question is asked
 - Clicking yes or no will send response to the player 2 screen
 - Clicking submit answer on player 2 screens allows final submission.
-
-Notes: Both UI and API folder has .env file which can be used to change/update environment or you can do it by modifying docker-compose.yml.
